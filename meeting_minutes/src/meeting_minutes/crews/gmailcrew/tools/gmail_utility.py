@@ -3,13 +3,16 @@ import base64
 from email.mime.text import MIMEText
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from email.message import EmailMessage
 
 import markdown
+from dotenv import load_dotenv
 
-SCOPES = ['https://www.googleapis.com/auth/gmail.compose']
+# Load environment variables from .env file
+load_dotenv()
+
+SCOPES = ['https://mail.google.com/"']
 
 HTML_TEMPLATE = """
     <!DOCTYPE html>
@@ -25,38 +28,32 @@ HTML_TEMPLATE = """
 """
 
 def authenticate_gmail():
-    """Shows basic usage of the Gmail API.
-        Returns:
-        service: Authorized Gmail API service instance.
-    """
-    # Get the directory where this script is located
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    token_path = os.path.join(current_dir, 'token.json')
-    credentials_path = os.path.join(current_dir, 'credentials.json')
+    """Authenticate to the Gmail API using credentials from environment variables."""
+    client_id = os.getenv('GMAIL_CLIENT_ID')
+    client_secret = os.getenv('GMAIL_CLIENT_SECRET')
+    refresh_token = os.getenv('GMAIL_REFRESH_TOKEN')
 
-    creds = None
-    # The file token.json stores the user's access and refresh tokens, and is
-    # created automatically when the authorization flow completes for the first time.
-    if os.path.exists(token_path):
-        creds = Credentials.from_authorized_user_file(token_path, SCOPES)
-    # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
+    if not all([client_id, client_secret, refresh_token]):
+        raise EnvironmentError(
+            "CLIENT_ID, CLIENT_SECRET, and REFRESH_TOKEN must be set in the .env file."
+        )
+
+    creds = Credentials(
+        None,
+        refresh_token=refresh_token,
+        token_uri='https://oauth2.googleapis.com/token',
+        client_id=client_id,
+        client_secret=client_secret,
+        scopes=SCOPES
+    )
+
+    try:
+        # Refresh the access token if necessary
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
-        else:
-            if not os.path.exists(credentials_path):
-                raise FileNotFoundError(
-                    f"credentials.json not found at {credentials_path}. "
-                    "Please ensure you have downloaded your OAuth 2.0 credentials "
-                    "from Google Cloud Console and placed them in the correct location."
-                )
-            
-            flow = InstalledAppFlow.from_client_secrets_file(
-                credentials_path, SCOPES)
-            creds = flow.run_local_server(port=0)
-        # Save the credentials for the next run
-        with open(token_path, 'w') as token:
-            token.write(creds.to_json())
+    except Exception as e:
+        print(f"Failed to refresh credentials: {e}")
+        raise
 
     service = build('gmail', 'v1', credentials=creds)
     return service
@@ -82,12 +79,12 @@ def create_message(sender, to, subject, message_text):
     )
 
     msg = EmailMessage()
-    content=formatted_html
+    content = formatted_html
 
     msg['To'] = to
     msg['From'] = sender
     msg['Subject'] = subject
-    msg.add_header('Content-Type','text/html')
+    msg.add_header('Content-Type', 'text/html')
     msg.set_payload(content)
 
     encodedMsg = base64.urlsafe_b64encode(msg.as_bytes()).decode()
@@ -114,10 +111,4 @@ def create_draft(service, user_id, message_body):
     except Exception as error:
         print(f'An error occurred: {error}')
         return None 
-    
-if __name__ == "__main__":
-    try:
-        service = authenticate_gmail()
-        print("Authentication successful. Service instance created.")
-    except Exception as e:
-        print(f"Authentication failed: {e}")
+
