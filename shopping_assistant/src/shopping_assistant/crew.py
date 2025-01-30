@@ -68,7 +68,7 @@ class ShoppingAssistant():
         product_name = inputs["product_name"]
         search_query = (
             f"{product_name} price site:amazon.com OR "
-            f"site:flipkart.com OR site:walmart.com OR site:bestbuy.com OR site:ebay.com OR site:target.com OR site:aliexpress.com"
+            f"site:flipkart.com OR site:walmart.com OR site:bestbuy.com OR site:ebay.com"
         )
         print(f"🔍 Modified Search Query: {search_query}")  # ✅ Debugging
         return {"search_query": search_query}

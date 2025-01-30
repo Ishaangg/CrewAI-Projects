@@ -1,17 +1,22 @@
-research_task:
+scrape_task:
   description: >
-    Conduct a thorough research about {topic}
-    Make sure you find any interesting and relevant information given
-    the current year is 2024.
+    Search for {product_name} on multiple e-commerce websites and scrape all product prices.
+    This includes Amazon, Flipkart, Walmart, BestBuy, eBay, Target, and AliExpress.
   expected_output: >
-    A list with 10 bullet points of the most relevant information about {topic}
-  agent: researcher
+    A JSON dictionary with store names and respective prices for {product_name} from all available sources.
+  agent: product_scraper
 
-reporting_task:
+
+compare_task:
   description: >
-    Review the context you got and expand each topic into a full section for a report.
-    Make sure the report is detailed and contains any and all relevant information.
+    Compare all collected product prices and determine the lowest price available.
   expected_output: >
-    A fully fledged report with the main topics, each with a full section of information.
-    Formatted as markdown without '```'
-  agent: reporting_analyst
+    A report showing the best price and the store offering it for {product_name}.
+  agent: price_comparator
+
+notify_task:
+  description: >
+    Send an alert to the user when the best price for {product_name} is found.
+  expected_output: >
+    An email or notification alerting the user about the best available price for {product_name}.
+  agent: notifier
