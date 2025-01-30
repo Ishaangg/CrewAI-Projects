@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 import sys
 import warnings
-from shopping_assistant.crew import ShoppingAssistant
-
+from crew import ShoppingAssistant
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
+
 
 def run():
     """Run the shopping assistant crew."""
     inputs = {
-        'product_name': 'iPhone 15 Pro'
+        'product_name': 'Air fryer'
     }
     ShoppingAssistant().crew().kickoff(inputs=inputs)
 
