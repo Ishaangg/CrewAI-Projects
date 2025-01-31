@@ -1,22 +1,32 @@
 scrape_task:
   description: >
-    Search for {product_name} on multiple e-commerce websites and scrape all product prices.
-    This includes Amazon, Flipkart, Walmart, BestBuy, eBay, Target, and AliExpress.
+    Search for {product_name} on multiple e-commerce websites and scrape 
+    all relevant details (prices, ratings, shipping info, etc.).
   expected_output: >
-    A JSON dictionary with store names and respective prices for {product_name} from all available sources.
+    A JSON-like structure containing store names, prices, ratings, 
+    and any other relevant attributes for {product_name}.
   agent: product_scraper
-
 
 compare_task:
   description: >
-    Compare all collected product prices and determine the lowest price available.
+    Compare all collected product information based on {decision_criterion}. 
+    Possible criteria: cost, rating, shipping_speed, brand_reputation, etc.
   expected_output: >
-    A report showing the best price and the store offering it for {product_name}.
+    A structured report identifying the best option for {product_name} 
+    given the {decision_criterion}. For instance:
+    {
+      "best_store": "...",
+      "best_price": "...", 
+      "best_rating": "...",
+      ...
+    }
   agent: price_comparator
 
 notify_task:
   description: >
-    Send an alert to the user when the best price for {product_name} is found.
+    Notify the user about the selected best product according to the 
+    provided {decision_criterion}.
   expected_output: >
-    An email or notification alerting the user about the best available price for {product_name}.
+    A clear notification or message stating the chosen store, 
+    the relevant details, and why it is best based on {decision_criterion}.
   agent: notifier
